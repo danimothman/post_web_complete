@@ -174,7 +174,7 @@ class FabUser extends Contract {
         return JSON.stringify(allResults);
     }
 
-    async changeUser(ctx, userNumber, newUsername) {
+    async changeUsername(ctx, userNumber, newUsername) {
         console.info('============= START : changeCarOwner ===========');
         const userAsBytes = await ctx.stub.getState(userNumber); // get the user from chaincode state
         if (!userAsBytes || userAsBytes.length === 0) {
@@ -186,16 +186,16 @@ class FabUser extends Contract {
         console.info('============= END : changeCarOwner ===========');
     }
 
-    async changeBlog(ctx, userNumber, newUsername) {
-        console.info('============= START : changeCarOwner ===========');
-        const userAsBytes = await ctx.stub.getState(userNumber); // get the user from chaincode state
-        if (!userAsBytes || userAsBytes.length === 0) {
-            throw new Error(`${userNumber} does not exist`);
+    async changeBlog(ctx, blogNumber, newDesc) {
+        console.info('============= START : changeBLog ===========');
+        const blogAsBytes = await ctx.stub.getState(blogNumber); // get the blog from chaincode state
+        if (!blogAsBytes || blogAsBytes.length === 0) {
+            throw new Error(`${blogNumber} does not exist`);
         }
-        const users = JSON.parse(userAsBytes.toString());
-        users.username = newUsername;
-        await ctx.stub.putState(userNumber, Buffer.from(JSON.stringify(users)));
-        console.info('============= END : changeCarOwner ===========');
+        const blogs = JSON.parse(blogAsBytes.toString());
+        blogs.desc = newDesc;
+        await ctx.stub.putState(blogNumber, Buffer.from(JSON.stringify(blogs)));
+        console.info('============= END : changeBlog ===========');
     }
 }
 module.exports = FabUser;
