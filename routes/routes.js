@@ -2,7 +2,7 @@ var express = require('express')
 var router = express.Router()
 var User = require('../models/user')
 var Content = require('../models/listModel')
-
+var queryUtil = require('../utils/Util')
 
 // Authentication Middleware
 const loggedInOnly = (req, res, next) => {
@@ -28,12 +28,18 @@ router.use(function(req,res,next){
   });
 // // Main Page
 router.get("/", loggedInOnly, (req, res ,done) => {
+
+
+
+  
     Content.find((err, result)=>{
       if(err) {
         done(err)
       }
+      var user = JSON.parse(userData)
+      // console.log(user)
       console.log(req.user.username)
-      res.render("index", { username: req.user.username , data:result});
+      res.render("index", { username: req.user.username , data:result, user:});
     })
     
   });
@@ -44,6 +50,7 @@ router.get('/data' , loggedInOnly, function(req,res){
     if(err) {
       console.log(err)
     }
+    var user = JSON.parse(userData)
     res.json({"address":"서울시 마포구 백범로 18"})
   })
     // console.log(req)
@@ -119,6 +126,25 @@ router.post('/content' ,function(req, res){
         }
     })    
 })
+
+router.get('/createuser', (req, res, next)=>{
+  res.render("sdfad============================fs")
+})
+
+
+
+router.post('/createuser', (req, res, next)=>{
+  var KEY = req.body.KEY
+  var username = req.body.username
+  var email = req.body.email
+  var phone = req.body.phone
+  var words = req.body.words
+
+  await queryUtil.create_user(KEY, username, email, phone, words)
+  res.
+
+})
+
 
 router.post('/delete/:id', (req ,res , next)=>{
   var id = req.params.id
