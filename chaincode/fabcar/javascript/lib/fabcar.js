@@ -47,8 +47,23 @@ class FabUser extends Contract {
                 author:{
                     username:'KIM',
                     email:'1@naver.com',
-                    phone:'',
-                    words:''
+                    phone:'010-0000-0001',
+                    words:'hello'
+                }
+            }
+        ]
+
+
+        const blogs = [
+            {
+                title:"JAVA",
+                desc:"JAVA language is interpreter language",
+                email:"2@naver.com",
+                author:{
+                    username:'dani',
+                    email:'2@naver.com',
+                    phone:'010-0000-0002',
+                    words:'world'
                 }
             }
         ]
@@ -76,8 +91,21 @@ class FabUser extends Contract {
         console.log(userAsBytes.toString());
         return userAsBytes.toString();
     }
+
+    async queryBlog(ctx, blogNumber) {
+        const blogAsBytes = await ctx.stub.getState(blogNumber); // get the car from chaincode state
+        if (!blogAsBytes || blogAsBytes.length === 0) {
+            throw new Error(`${blogNumber} does not exist`);
+        }
+        console.log(blogAsBytes.toString());
+        return blogAsBytes.toString();
+    }
+
+
+
     async createUser(ctx, userNumber, username, email, phone, words) {
         console.info('============= START : Create User ===========');
+        
         const users = {
             username,
             docType: 'user',
@@ -88,6 +116,25 @@ class FabUser extends Contract {
         await ctx.stub.putState(userNumber, Buffer.from(JSON.stringify(users)));
         console.info('============= END : Create User ===========');
     }
+
+    async createBlog(ctx,userNumber, blogNumber, title, desc) {
+        console.info('============= START : Create Blog ===========');
+        const userAsBytes = await ctx.stub.getState(userNumber); // get the user from chaincode state
+        if (!userAsBytes || userAsBytes.length === 0) {
+            throw new Error(`${userNumber} does not exist`);
+        }
+        const users = await JSON.parse(userAsBytes.toString());
+        const blogs = {
+            title,
+            docType: 'blog',
+            desc,
+            author:users,
+        };
+        await ctx.stub.putState(blogNumber, Buffer.from(JSON.stringify(blogs)));
+        console.info('============= END : Create Blog ===========');
+    }
+
+
     async queryAllUsers(ctx) {
         const startKey = 'USER0';
         const endKey = 'USER99';
@@ -106,7 +153,40 @@ class FabUser extends Contract {
         console.info(allResults);
         return JSON.stringify(allResults);
     }
-    async changeUsername(ctx, userNumber, newUsername) {
+
+
+    async queryAllBlogs(ctx) {
+        const startKey = 'BLOG0';
+        const endKey = 'BLOG99';
+        const allResults = [];
+        for await (const {key, value} of ctx.stub.getStateByRange(startKey, endKey)) {
+            const strValue = Buffer.from(value).toString('utf8');
+            let record;
+            try {
+                record = JSON.parse(strValue);
+            } catch (err) {
+                console.log(err);
+                record = strValue;
+            }
+            allResults.push({ Key: key, Record: record });
+        }
+        console.info(allResults);
+        return JSON.stringify(allResults);
+    }
+
+    async changeUser(ctx, userNumber, newUsername) {
+        console.info('============= START : changeCarOwner ===========');
+        const userAsBytes = await ctx.stub.getState(userNumber); // get the user from chaincode state
+        if (!userAsBytes || userAsBytes.length === 0) {
+            throw new Error(`${userNumber} does not exist`);
+        }
+        const users = JSON.parse(userAsBytes.toString());
+        users.username = newUsername;
+        await ctx.stub.putState(userNumber, Buffer.from(JSON.stringify(users)));
+        console.info('============= END : changeCarOwner ===========');
+    }
+
+    async changeBlog(ctx, userNumber, newUsername) {
         console.info('============= START : changeCarOwner ===========');
         const userAsBytes = await ctx.stub.getState(userNumber); // get the user from chaincode state
         if (!userAsBytes || userAsBytes.length === 0) {
